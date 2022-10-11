@@ -21,6 +21,7 @@ while True:  # The Event Loop
     if event in (None, "Exit"):
         break
     if event == "=":
+
         if not values[0] or not values[2]:
             window.FindElement("-OUT-").Update("You need to input values")
 
