@@ -1,4 +1,3 @@
-from unicodedata import decimal
 import PySimpleGUI as sg
 import re
 from decimal import *
@@ -7,7 +6,7 @@ layout = [
     [sg.Text("Marynichava Anastasiya Egorovna, 4th course, 4th group, 2022")],
     [
         sg.InputText(),
-        sg.InputOptionMenu(["+", "-"]),
+        sg.InputOptionMenu(["+", "-", "*", "/"]),
         sg.InputText(),
         sg.Button("="),
         sg.Output(key="-OUT-", size=(80, 5)),
@@ -38,15 +37,30 @@ while True:
         else:
             if values[1] == "+":
                 if abs(Decimal(values[0]) + Decimal(values[2])) <= 1000000000000:
-                    window.FindElement("-OUT-").Update(Decimal(Decimal(values[0]) + Decimal(values[2])))
+                    window.FindElement("-OUT-").Update(Decimal(Decimal(values[0]) + Decimal(values[2])).normalize())
                 else:
                     window.FindElement("-OUT-").Update("The modulus of the sum more than 1 000 000 000 000!")
 
             elif values[1] == "-":
                 if abs(Decimal(values[0]) - Decimal(values[2])) <= 1000000000000:
-                    window.FindElement("-OUT-").Update(Decimal(Decimal(values[0]) - Decimal(values[2])))
+                    window.FindElement("-OUT-").Update(Decimal(Decimal(values[0]) - Decimal(values[2])).normalize())
                 else:
                     window.FindElement("-OUT-").Update("The modulus of the difference more than 1 000 000 000 000!")
+
+            elif values[1] == "*":
+                if abs(Decimal(values[0]) * Decimal(values[2])) <= 1000000000000:
+                    window.FindElement("-OUT-").Update(Decimal(Decimal(values[0]) * Decimal(values[2])).normalize())
+                else:
+                    window.FindElement("-OUT-").Update("The modulus of the multiplication more than 1 000 000 000 000!")
+
+            elif values[1] == "/":
+                if values[2] == 0:
+                    window.FindElement("-OUT-").Update("Division by zero error!")
+                if abs(Decimal(values[0]) * Decimal(values[2])) <= 1000000000000:
+                    window.FindElement("-OUT-").\
+                        Update(Decimal(Decimal(values[0]) / Decimal(values[2])).quantize(Decimal("0.000001")).normalize())
+                else:
+                    window.FindElement("-OUT-").Update("The modulus of the division more than 1 000 000 000 000!")
 
             else:
                 window.FindElement("-OUT-").Update("You need to choose the operation")
