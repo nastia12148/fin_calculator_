@@ -32,7 +32,7 @@ while True:
         elif abs(Decimal(values[0])) > 1000000000000 or abs(Decimal(values[2])) > 1000000000000:
             window.FindElement("-OUT-").Update("The modulus of the input value is very big!")
 
-        elif abs(Decimal(values[0])) < 0.000000000001 or abs(Decimal(values[2])) < 0.000000000001:
+        elif abs(Decimal(values[0])) < 0.000001 or abs(Decimal(values[2])) < 0.000001:
             window.FindElement("-OUT-").Update("The modulus of the input value is very small!")
         else:
             if values[1] == "+":
