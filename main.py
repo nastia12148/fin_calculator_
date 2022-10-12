@@ -20,7 +20,8 @@ while True:
     if event in (None, "Exit"):
         break
     if event == "=":
-
+        values[0] = values[0].replace(",", ".")
+        values[2] = values[2].replace(",", ".")
         if not values[0] or not values[2]:
             window.FindElement("-OUT-").Update("You need to input values")
 
