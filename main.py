@@ -38,13 +38,13 @@ while True:
         else:
             if values[1] == "+":
                 if abs(Decimal(values[0]) + Decimal(values[2])) <= 1000000000000:
-                    window.FindElement("-OUT-").Update(Decimal(Decimal(values[0]) + Decimal(values[2])).normalize())
+                    window.FindElement("-OUT-").Update(format(Decimal(Decimal(values[0]) + Decimal(values[2])).normalize(), "1.6f"))
                 else:
                     window.FindElement("-OUT-").Update("The modulus of the sum more than 1 000 000 000 000!")
 
             elif values[1] == "-":
                 if abs(Decimal(values[0]) - Decimal(values[2])) <= 1000000000000:
-                    window.FindElement("-OUT-").Update(Decimal(Decimal(values[0]) - Decimal(values[2])).normalize())
+                    window.FindElement("-OUT-").Update(format(Decimal(Decimal(values[0]) - Decimal(values[2])).normalize(), "1.6f"))
                 else:
                     window.FindElement("-OUT-").Update("The modulus of the difference more than 1 000 000 000 000!")
 
