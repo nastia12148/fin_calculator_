@@ -1,16 +1,94 @@
+import math
+
 import PySimpleGUI as sg
+import numpy as np
 import re
 from decimal import *
+
+
+def is_right_size_value(value: Decimal):
+    if value > 1000000000000:
+        return False
+    elif value * 100000000000 % 10 != 0:
+        return False
+    else:
+        return True
+
+
+def is_number_value(value: str):
+    return re.match(r"\d", value)
+
+
+def is_correct_number_value(value:str):
+    return re.match(r"([+-]?\d+[.,]?\d*$)|([+-]?(([1-9])|([1-9]\d)|([1-9]\d\d))([ ]\d{3})*[.,]?\d*$)", value)
+
+
+def clear_value(value: str):
+    value = value.replace(' ', '')
+    value = value.replace(',', '.')
+    return value
+
+
+def calculate_problem(values):
+    str_problem = "Decimal("
+    for i in range(0, 7):
+        if i % 2 == 0:
+            if not is_number_value(values[i]):
+                return "Your input must contain only numbers and only 1 '.' or ',' symbol"
+            elif not is_correct_number_value(values[i]):
+                return "Incorrect amount or placement of spaces in " + str(i/2) + " value"
+            elif not is_right_size_value(Decimal(clear_value(values[i]))):
+                return "The modulus of the input " + str(i/2) + " value is very big or very small!"
+            values[i] = clear_value(values[i])
+            str_problem += "Decimal("+str(values[i])+")"
+        elif i == 1:
+            if values[i] == '/':
+                if (values[i+2] == '/' and values[i+3] == '0') or eval("Decimal(Decimal(" + values[i+1] + ")" + values[i+2] + "Decimal(" + values[i+3] + "))") < 0.00000000005:
+                    return "Divizion by zero!"
+            str_problem += values[i] + "("
+        elif i == 5:
+            if values[i] == '/' and values[i+1] == '0':
+                return "Divizion by zero!"
+            str_problem += ")" + values[i]
+        else:
+            if values[i] == '/' and values[i+1] == '0':
+                return "Divizion by zero!"
+            str_problem += values[i]
+
+    str_problem += ")"
+    return eval(str_problem)
+
+
+def format_output(value):
+    if value.isdecimal():
+        return format(value.normalize(),  '^10,.10f').replace(',', ' ').rstrip('0')
+    else:
+        return value
+
+
+
 
 layout = [
     [sg.Text("Marynichava Anastasiya Egorovna, 4th course, 4th group, 2022")],
     [
-        sg.InputText(),
-        sg.InputOptionMenu(["+", "-", "*", "/"]),
-        sg.InputText(),
+        sg.InputText(0,25,5),
+        sg.InputOptionMenu(["+", "-", "*", "/"],default_value="+"),
+        sg.Text('('),
+        sg.InputText(0,25,5),
+        sg.InputOptionMenu(["+", "-", "*", "/"],default_value="+"),
+        sg.InputText(0,25,5),
+        sg.Text(')'),
+        sg.InputOptionMenu(["+", "-", "*", "/"],default_value="+"),
+        sg.InputText(0,25,5),
+
         sg.Button("="),
         sg.Output(key="-OUT-", size=(80, 5)),
     ],
+    [[sg.Text("Round")],
+    [sg.Radio("Math", "RADI01", default=True)],
+    [sg.Radio("Half-even", "RADI01", default=False)],
+    [sg.Radio("отсечением", "RADI01", default=False)],], [sg.Text("Round result"),
+     sg.Output(key = "-OUT2-", size= (30,5))],
     ]
 window = sg.Window("Financial calculator", layout).finalize()
 
@@ -20,53 +98,9 @@ while True:
     if event in (None, "Exit"):
         break
     if event == "=":
-        values[0] = values[0].replace(",", ".")
-        values[2] = values[2].replace(",", ".")
-        if not values[0] or not values[2]:
-            window.FindElement("-OUT-").Update("You need to input values")
 
-        elif not re.match(r"\d",values[0]) or not re.match(r"\d", values[2]):
-            window.FindElement("-OUT-").Update("Your input must contain only numbers and only 1 '.' or ',' symbol")
+        b = calculate_problem(values)
+        window.FindElement("-OUT-").Update(str(format_output(b)))
+    else:
+        print('hello')
 
-        elif not re.match(r"([+-]?[0-9]+[.,]?[0-9]*$)|([+-]?(([1-9])|([1-9][0-9])|([1-9][0-9][0-9]))([ ][0-9][0-9][0-9])*[.,]?[0-9]*$)", values[0]) or not re.match(
-            r"([+-]?[0-9]+[.,]?[0-9]*$)|([+-]?(([1-9])|([1-9][0-9])|([1-9][0-9][0-9]))([ ][0-9][0-9][0-9])*[.,]?[0-9]*$)", values[2]
-        ):
-            window.FindElement("-OUT-").Update("Incorrect amount or placement of spaces")
-
-        elif abs(Decimal(values[0].replace(" ", ""))) > 1000000000000 or abs(Decimal(values[2].replace(" ", ""))) > 1000000000000:
-            window.FindElement("-OUT-").Update("The modulus of the input value is very big!")
-
-        elif (abs(Decimal(values[0].replace(" ", "")))*10000000 % 10 != 0) or (abs(Decimal(values[2].replace(" ", "")))*10000000 % 10) != 0:
-            window.FindElement("-OUT-").Update("Fractional part of modulus of the input value contain more than 6 numbers!")
-        else:
-            values[0] = values[0].replace(" ", "")
-            values[2] = values[2].replace(" ", "")
-            if values[1] == "+":
-                if abs(Decimal(values[0]) + Decimal(values[2])) <= 1000000000000:
-                    window.FindElement("-OUT-").Update('{0:,}'.format(Decimal(Decimal(values[0]) + Decimal(values[2])).normalize(), "1.6f").replace(",", " "))
-                else:
-                    window.FindElement("-OUT-").Update("The modulus of the sum more than 1 000 000 000 000!")
-
-            elif values[1] == "-":
-                if abs(Decimal(values[0]) - Decimal(values[2])) <= 1000000000000:
-                    window.FindElement("-OUT-").Update('{0:,}'.format(Decimal(Decimal(values[0]) - Decimal(values[2])).normalize(), "1.6f").replace(",", " "))
-                else:
-                    window.FindElement("-OUT-").Update("The modulus of the difference more than 1 000 000 000 000!")
-
-            elif values[1] == "*":
-                if abs(Decimal(values[0]) * Decimal(values[2])) <= 1000000000000:
-                    window.FindElement("-OUT-").Update('{0:,}'.format(Decimal(Decimal(values[0]) * Decimal(values[2])).normalize(), "1.6f").replace(",", " "))
-                else:
-                    window.FindElement("-OUT-").Update("The modulus of the multiplication more than 1 000 000 000 000!")
-
-            elif values[1] == "/":
-                if values[2] == 0:
-                    window.FindElement("-OUT-").Update("Division by zero error!")
-                if abs(Decimal(values[0]) * Decimal(values[2])) <= 1000000000000:
-                    window.FindElement("-OUT-").\
-                        Update('{0:,}'.format(Decimal(Decimal(values[0]) / Decimal(values[2])).quantize(Decimal("0.000001")).normalize(), "1.6f").replace(",", " "))
-                else:
-                    window.FindElement("-OUT-").Update("The modulus of the division more than 1 000 000 000 000!")
-
-            else:
-                window.FindElement("-OUT-").Update("You need to choose the operation")
