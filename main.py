@@ -1,7 +1,4 @@
-import math
-
 import PySimpleGUI as sg
-import numpy as np
 import re
 from decimal import *
 
@@ -56,16 +53,21 @@ def calculate_problem(values):
             str_problem += values[i]
 
     str_problem += ")"
+    value = eval(str_problem)
+    if value > 1000000000000:
+        return "Result is mor than 10^12"
+
     return eval(str_problem)
 
 
 def format_output(value):
-    if value.isdecimal():
+    if re.match(r"\d.\d", str(value)):
         return format(value.normalize(),  '^10,.10f').replace(',', ' ').rstrip('0')
     else:
         return value
 
-
+def round_of_result(value):
+    return 0
 
 
 layout = [
@@ -87,7 +89,7 @@ layout = [
     [[sg.Text("Round")],
     [sg.Radio("Math", "RADI01", default=True)],
     [sg.Radio("Half-even", "RADI01", default=False)],
-    [sg.Radio("отсечением", "RADI01", default=False)],], [sg.Text("Round result"),
+    [sg.Radio("Down", "RADI01", default=False)],], [sg.Text("Round result"),
      sg.Output(key = "-OUT2-", size= (30,5))],
     ]
 window = sg.Window("Financial calculator", layout).finalize()
@@ -101,6 +103,12 @@ while True:
 
         b = calculate_problem(values)
         window.FindElement("-OUT-").Update(str(format_output(b)))
+    if values[7]:
+        window.FindElement("-OUT2-").Update(Context(prec=2, rounding=ROUND_UP).create_decimal(str(calculate_problem(values))))
+    if values[8]:
+        window.FindElement("-OUT2-").Update(Context(prec=2, rounding=ROUND_HALF_EVEN).create_decimal(str(calculate_problem(values))))
+    if values[9]:
+        window.FindElement("-OUT2-").Update(Context(prec=2, rounding=ROUND_DOWN).create_decimal(str(calculate_problem(values))))
     else:
-        print('hello')
+        a = 0
 
