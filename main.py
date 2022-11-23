@@ -61,13 +61,22 @@ def calculate_problem(values):
 
 
 def format_output(value):
-    if re.match(r"\d.\d", str(value)):
+    if re.match(r"\d.\d*", str(value)):
         return format(value.normalize(),  '^10,.10f').replace(',', ' ').rstrip('0')
     else:
         return value
 
-def round_of_result(value):
-    return 0
+def round_of_result(values):
+    if values[7]:
+        window.FindElement("-OUT2-").Update(
+            format(Context(prec=12, rounding=ROUND_UP).create_decimal(str((calculate_problem(values)))), ".0f"))
+    if values[8]:
+        window.FindElement("-OUT2-").Update(
+            format(Context(prec=12, rounding=ROUND_HALF_EVEN).create_decimal(str(calculate_problem(values))),
+            ".0f"))
+    if values[9]:
+        window.FindElement("-OUT2-").Update(
+            format(Context(prec=1, rounding=ROUND_DOWN).create_decimal(str(calculate_problem(values))), ".0f"))
 
 
 layout = [
@@ -101,14 +110,9 @@ while True:
         break
     if event == "=":
 
-        b = calculate_problem(values)
-        window.FindElement("-OUT-").Update(str(format_output(b)))
-    if values[7]:
-        window.FindElement("-OUT2-").Update(Context(prec=2, rounding=ROUND_UP).create_decimal(str(calculate_problem(values))))
-    if values[8]:
-        window.FindElement("-OUT2-").Update(Context(prec=2, rounding=ROUND_HALF_EVEN).create_decimal(str(calculate_problem(values))))
-    if values[9]:
-        window.FindElement("-OUT2-").Update(Context(prec=2, rounding=ROUND_DOWN).create_decimal(str(calculate_problem(values))))
+        window.FindElement("-OUT-").Update(str(format_output(calculate_problem(values))))
+        round_of_result(values)
+
     else:
         a = 0
 
