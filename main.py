@@ -1,3 +1,5 @@
+import decimal
+
 import PySimpleGUI as sg
 import re
 from decimal import *
@@ -62,21 +64,23 @@ def calculate_problem(values):
 
 def format_output(value):
     if re.match(r"\d.\d*", str(value)):
-        return format(value.normalize(),  '^10,.10f').replace(',', ' ').rstrip('0')
+        return format(value.normalize(),  '^10,.10f').replace(',', ' ').rstrip('0').rstrip('.')
     else:
         return value
 
+
 def round_of_result(values):
-    if values[7]:
+    if not re.match(r"\d.\d*",str(calculate_problem(values))):
+        window.FindElement("-OUT2-").Update(calculate_problem(values))
+    elif values[7]:
         window.FindElement("-OUT2-").Update(
-            format(Context(prec=12, rounding=ROUND_UP).create_decimal(str((calculate_problem(values)))), ".0f"))
-    if values[8]:
+            format(decimal.Decimal(calculate_problem(values)).quantize(decimal.Decimal('0'), rounding=ROUND_HALF_UP)))
+    elif values[8]:
         window.FindElement("-OUT2-").Update(
-            format(Context(prec=12, rounding=ROUND_HALF_EVEN).create_decimal(str(calculate_problem(values))),
-            ".0f"))
-    if values[9]:
+            format(decimal.Decimal(calculate_problem(values)).quantize(decimal.Decimal('0'), rounding=ROUND_HALF_EVEN)))
+    elif values[9]:
         window.FindElement("-OUT2-").Update(
-            format(Context(prec=1, rounding=ROUND_DOWN).create_decimal(str(calculate_problem(values))), ".0f"))
+            format(decimal.Decimal(calculate_problem(values)).quantize(decimal.Decimal('0'), rounding=ROUND_DOWN)))
 
 
 layout = [
@@ -111,6 +115,7 @@ while True:
     if event == "=":
 
         window.FindElement("-OUT-").Update(str(format_output(calculate_problem(values))))
+    if values[7] or values[8] or values[9]:
         round_of_result(values)
 
     else:
