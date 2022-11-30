@@ -15,7 +15,7 @@ def is_right_size_value(value: Decimal):
 
 
 def is_number_value(value: str):
-    return re.match(r"\d", value)
+    return re.match(r"[-]?\d", value)
 
 
 def is_correct_number_value(value:str):
@@ -63,14 +63,14 @@ def calculate_problem(values):
 
 
 def format_output(value):
-    if re.match(r"\d.\d*", str(value)):
+    if re.match(r"[-]?\d.\d*", str(value)):
         return format(value.normalize(),  '^10,.10f').replace(',', ' ').rstrip('0').rstrip('.')
     else:
         return value
 
 
 def round_of_result(values):
-    if not re.match(r"\d.\d*",str(calculate_problem(values))):
+    if not re.match(r"[-]?\d.\d*",str(calculate_problem(values))):
         window.FindElement("-OUT2-").Update(calculate_problem(values))
     elif values[7]:
         window.FindElement("-OUT2-").Update(
@@ -114,7 +114,7 @@ while True:
         break
     if event == "=":
 
-        window.FindElement("-OUT-").Update(str(format_output(calculate_problem(values))))
+        window.FindElement("-OUT-").Update((format_output(calculate_problem(values))))
     if values[7] or values[8] or values[9]:
         round_of_result(values)
 
