@@ -1,5 +1,4 @@
 import decimal
-
 import PySimpleGUI as sg
 import re
 from decimal import *
